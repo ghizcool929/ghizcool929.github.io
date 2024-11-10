@@ -24,9 +24,10 @@ jobs:
 
     - name: Download and prepare Boost
       run: |
+        sudo mkdir -p /opt/local/include
         wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
-        sudo tar xzf boost_1_76_0.tar.gz -C /opt/local
-        sudo mv /opt/local/boost_1_76_0 /opt/local/include/boost
+        sudo tar xzf boost_1_76_0.tar.gz -C /opt/local/include
+        sudo mv /opt/local/include/boost_1_76_0 /opt/local/include/boost
 
     - name: Build project
       run: |
