@@ -25,25 +25,15 @@ jobs:
     - name: Download and prepare Boost
       run: |
         wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
-        tar xzf boost_1_76_0.tar.gz
-        cd boost_1_76_0
-        ./bootstrap.sh
-
-    - name: Compile Boost for Emscripten
-      run: |
-        cd boost_1_76_0
-        echo "using emscripten : : em++ ;" > user-config.jam
-        ./b2 --with-utility \
-             toolset=emscripten link=static threading=multi runtime-link=static \
-             --prefix=$HOME/emscripten_boost install
+        sudo tar xzf boost_1_76_0.tar.gz -C /opt/local
+        sudo mv /opt/local/boost_1_76_0 /opt/local/include/boost
 
     - name: Build project
       run: |
         mkdir -p build/release
         emcc -s WASM=1 -O3 -std=c++11 \
              -I. -Isrc -Isrc/crypto -Isrc/common -Isrc/contrib/epee/include \
-             -I$HOME/emscripten_boost/include \
-             -L$HOME/emscripten_boost/lib \
+             -I/opt/local/include \
              -s EXPORTED_FUNCTIONS='["_main", "_allocate_state", "_free_state", "_hash"]' \
              -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
              -s ALLOW_MEMORY_GROWTH=1 \
