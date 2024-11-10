@@ -3,8 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Adjust this if your default branch has a different name
-  workflow_dispatch:  # This enables manual triggering
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -17,9 +17,26 @@ jobs:
     - name: Set up Emscripten
       uses: mymindstorm/setup-emsdk@v11
 
+    - name: Install Boost
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libboost-all-dev
+
     - name: Build project
       run: |
-        make TYPE=release
+        mkdir -p build/release
+        emcc -s WASM=1 -O3 -std=c++11 \
+             -I. -Isrc -Isrc/crypto -Isrc/common -Isrc/contrib/epee/include -I/usr/include \
+             -s EXPORTED_FUNCTIONS='["_main", "_allocate_state", "_free_state", "_hash"]' \
+             -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
+             -s ALLOW_MEMORY_GROWTH=1 \
+             -s TOTAL_MEMORY=67108864 \
+             -s ENVIRONMENT=web \
+             --preload-file src@/ \
+             src/*.cpp src/crypto/*.c \
+             -o build/release/miner.html \
+             --shell-file template.html \
+             --post-js post.js
         cp build/release/miner.html build/release/index.html
 
     - name: Deploy to GitHub Pages
