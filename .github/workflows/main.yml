@@ -24,17 +24,16 @@ jobs:
 
     - name: Download and prepare Boost
       run: |
-        sudo mkdir -p /opt/local/include
         wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
-        sudo tar xzf boost_1_76_0.tar.gz -C /opt/local/include
-        sudo mv /opt/local/include/boost_1_76_0 /opt/local/include/boost
+        tar xzf boost_1_76_0.tar.gz
+        sudo mv boost_1_76_0/boost /usr/include/
 
     - name: Build project
       run: |
         mkdir -p build/release
         emcc -s WASM=1 -O3 -std=c++11 \
              -I. -Isrc -Isrc/crypto -Isrc/common -Isrc/contrib/epee/include \
-             -I/opt/local/include \
+             -I/usr/include \
              -s EXPORTED_FUNCTIONS='["_main", "_allocate_state", "_free_state", "_hash"]' \
              -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
              -s ALLOW_MEMORY_GROWTH=1 \
